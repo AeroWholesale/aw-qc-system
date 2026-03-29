@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.mdm</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.aerowholesale.mdm.profile</string>
+            <key>PayloadUUID</key>
+            <string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+            <key>PayloadDisplayName</key>
+            <string>AeroWholesale MDM</string>
+            <key>PayloadOrganization</key>
+            <string>AeroWholesale LLC</string>
+
+            <key>ServerURL</key>
+            <string>${MDM_SERVER_URL}/mdm/connect</string>
+            <key>CheckInURL</key>
+            <string>${MDM_SERVER_URL}/mdm/checkin</string>
+            <key>Topic</key>
+            <string>com.apple.mgmt.External</string>
+
+            <key>AccessRights</key>
+            <integer>8191</integer>
+            <key>ServerCapabilities</key>
+            <array>
+                <string>com.apple.mdm.per-user-connections</string>
+            </array>
+            <key>CheckOutWhenRemoved</key>
+            <true/>
+            <key>SignMessage</key>
+            <true/>
+        </dict>
+
+        <!-- Skip Setup Assistant Items -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.SetupAssistant.managed</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.aerowholesale.skip-setup</string>
+            <key>PayloadUUID</key>
+            <string>B2C3D4E5-F6A7-8901-BCDE-F12345678901</string>
+            <key>PayloadDisplayName</key>
+            <string>Skip Setup Items</string>
+            <key>PayloadOrganization</key>
+            <string>AeroWholesale LLC</string>
+
+            <key>SkipAppearance</key>
+            <true/>
+            <key>SkipBiometric</key>
+            <true/>
+            <key>SkipLanguageAndLocale</key>
+            <true/>
+            <key>SkipLocation</key>
+            <true/>
+            <key>SkipPayment</key>
+            <true/>
+            <key>SkipPrivacy</key>
+            <true/>
+            <key>SkipRestore</key>
+            <true/>
+            <key>SkipScreenTime</key>
+            <true/>
+            <key>SkipSiri</key>
+            <true/>
+            <key>SkipTOS</key>
+            <true/>
+        </dict>
+    </array>
+
+    <!-- Profile-level settings -->
+    <key>PayloadDisplayName</key>
+    <string>AeroWholesale QC Enrollment</string>
+    <key>PayloadIdentifier</key>
+    <string>com.aerowholesale.enroll</string>
+    <key>PayloadOrganization</key>
+    <string>AeroWholesale LLC</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>C3D4E5F6-A7B8-9012-CDEF-123456789012</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadRemovalDisallowed</key>
+    <true/>
+
+    <!-- Supervision settings -->
+    <key>IsSupervised</key>
+    <true/>
+</dict>
+</plist>

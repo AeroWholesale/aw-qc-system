@@ -490,17 +490,66 @@ document.getElementById("btn-confirm").addEventListener("click", async () => {
     document.getElementById("confirmed-count").textContent = stats.total;
 
     showPanel("confirmed");
+});
 
-    // Countdown
-    let secs = 5;
-    document.getElementById("countdown-num").textContent = secs;
-    const cdInterval = setInterval(() => {
+// ── Wipe workflow ──
+document.getElementById("btn-wipe-device").addEventListener("click", startWipe);
+document.getElementById("btn-skip-wipe").addEventListener("click", () => resetAll());
+document.getElementById("btn-skip-wipe-active").addEventListener("click", () => {
+    clearWipeTimer();
+    resetAll();
+});
+
+let wipeTimerInterval = null;
+
+function clearWipeTimer() {
+    if (wipeTimerInterval) { clearInterval(wipeTimerInterval); wipeTimerInterval = null; }
+}
+
+async function startWipe() {
+    if (!currentDevice) { resetAll(); return; }
+    showPanel("wipe");
+    document.getElementById("wipe-status").textContent = "Sending wipe command...";
+
+    // 3-minute timeout
+    let secs = 180;
+    document.getElementById("wipe-timer-num").textContent = secs;
+    wipeTimerInterval = setInterval(() => {
         secs--;
-        document.getElementById("countdown-num").textContent = secs;
-        if (secs <= 0) { clearInterval(cdInterval); resetAll(); }
+        document.getElementById("wipe-timer-num").textContent = secs;
+        if (secs <= 0) {
+            clearWipeTimer();
+            document.getElementById("wipe-status").textContent = "Wipe timed out";
+            setTimeout(() => resetAll(), 3000);
+        }
     }, 1000);
 
-    document.getElementById("btn-next-now").onclick = () => { clearInterval(cdInterval); resetAll(); };
+    try {
+        const res = await fetch("/api/station/wipe", {
+            method: "POST", headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ device_id: currentDevice.id })
+        });
+        const result = await res.json();
+        if (!result.ok) {
+            document.getElementById("wipe-status").textContent = "Wipe failed: " + (result.error || "Unknown");
+        }
+    } catch (e) {
+        document.getElementById("wipe-status").textContent = "Wipe request failed";
+    }
+}
+
+socket.on("wipe_status", data => {
+    if (!currentDevice || data.device_id !== currentDevice.id) return;
+    document.getElementById("wipe-status").textContent = data.message || data.status;
+
+    if (data.status === "complete") {
+        clearWipeTimer();
+        document.getElementById("wipe-status").textContent = "Complete";
+        document.querySelector(".wipe-indicator").style.background = "var(--pass)";
+        document.querySelector(".wipe-indicator").style.animation = "none";
+        document.querySelector(".wipe-warning").style.display = "none";
+        setTimeout(() => resetAll(), 3000);
+    }
 });
 
 // ── Init ──

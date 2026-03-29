@@ -1,3 +1,5 @@
+import sys
+import os
 from datetime import datetime
 
 from flask import Blueprint, request, jsonify
@@ -6,6 +8,9 @@ from app import db, socketio
 from app.models.device import Device
 from app.services.grader import calculate_grade
 from app.services.label_printer import generate_zpl, print_label
+
+# Add mdm/ to path for wipe module
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'mdm'))
 
 station_bp = Blueprint("station_api", __name__)
 
@@ -96,4 +101,51 @@ def print_qc_label():
 
     result = print_label(zpl)
     result["zpl"] = zpl
+    return jsonify(result)
+
+
+@station_bp.route("/wipe", methods=["POST"])
+def wipe_device_endpoint():
+    """Wipe a device via MDM or cfgutil fallback."""
+    data = request.get_json()
+    device_id = data.get("device_id")
+
+    if not device_id:
+        return jsonify({"ok": False, "error": "device_id required"}), 400
+
+    device = Device.query.get(device_id)
+    if not device:
+        return jsonify({"ok": False, "error": "Device not found"}), 404
+
+    # Broadcast wipe started
+    socketio.emit("wipe_status", {
+        "device_id": device_id,
+        "status": "sending",
+        "message": "Sending wipe command...",
+    })
+
+    try:
+        from wipe import wipe_device
+        result = wipe_device(
+            device_udid=data.get("udid"),
+            ecid=data.get("ecid"),
+        )
+    except ImportError:
+        result = {"ok": False, "error": "Wipe module not available"}
+
+    if result.get("ok"):
+        socketio.emit("wipe_status", {
+            "device_id": device_id,
+            "status": "erasing",
+            "message": "Device erasing...",
+        })
+        device.status = "wiped"
+        db.session.commit()
+    else:
+        socketio.emit("wipe_status", {
+            "device_id": device_id,
+            "status": "failed",
+            "message": f"Wipe failed: {result.get('error', 'Unknown error')}",
+        })
+
     return jsonify(result)

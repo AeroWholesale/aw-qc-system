@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "AWDiagnostic",
+    "slug": "AWDiagnostic",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#07090F"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aerowholesale.diagnostic",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera access needed for QC diagnostic tests",
+        "NSMicrophoneUsageDescription": "Microphone access needed for QC diagnostic tests"
+      }
+    },
+    "android": {
+      "package": "com.aerowholesale.diagnostic",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#07090F"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

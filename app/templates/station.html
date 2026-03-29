@@ -174,8 +174,22 @@
         <div class="confirmed-grade" id="confirmed-grade">CAP1</div>
         <div class="confirmed-label-sent">Label sent to printer</div>
         <div class="confirmed-count">Today: <span id="confirmed-count" class="mono-value">0</span></div>
-        <div class="confirmed-countdown">Next unit in <span id="countdown-num">5</span>s</div>
-        <button id="btn-next-now" class="btn btn-accent">Next Unit Now</button>
+        <div class="confirmed-actions">
+            <button id="btn-wipe-device" class="btn btn-fail-large">WIPE DEVICE</button>
+            <button id="btn-skip-wipe" class="btn btn-accent">Skip Wipe → Next Unit</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ STATE 7: WIPE ══════ -->
+<div id="state-wipe" class="panel hidden">
+    <div class="wipe-center">
+        <div class="wipe-indicator" id="wipe-indicator"></div>
+        <div class="wipe-title">WIPING DEVICE</div>
+        <div class="wipe-status" id="wipe-status">Sending wipe command...</div>
+        <div class="wipe-warning">⚠ DO NOT UNPLUG ⚠</div>
+        <div class="wipe-timer">Timeout: <span id="wipe-timer-num">180</span>s</div>
+        <button id="btn-skip-wipe-active" class="btn btn-muted">Skip Wipe</button>
     </div>
 </div>
 

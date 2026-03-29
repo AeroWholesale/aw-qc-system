@@ -5,3 +5,5 @@ venv/
 *.db
 .DS_Store
 instance/
+ios-diagnostic-app/node_modules/
+ios-diagnostic-app/.expo/

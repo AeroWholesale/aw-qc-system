@@ -288,6 +288,41 @@ body {
 .back-link { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
 .device-meta { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.5rem; }
 
+/* ── State 7: Wipe ── */
+.wipe-center {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 1.5rem; text-align: center;
+}
+.wipe-indicator {
+    width: 80px; height: 80px; border-radius: 50%; background: var(--fail);
+    animation: wipe-pulse 1.2s ease-in-out infinite;
+}
+@keyframes wipe-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+    50% { transform: scale(1.15); opacity: 0.8; box-shadow: 0 0 40px 20px rgba(239,68,68,0.3); }
+}
+.wipe-title {
+    font-family: var(--mono); font-size: 2.5rem; font-weight: 800;
+    color: var(--fail); letter-spacing: 0.1em;
+}
+.wipe-status {
+    font-family: var(--mono); font-size: 1.1rem; color: var(--text);
+}
+.wipe-warning {
+    font-family: var(--mono); font-size: 1.8rem; font-weight: 800;
+    color: var(--warn); letter-spacing: 0.05em;
+    animation: blink-warn 1s step-end infinite;
+}
+@keyframes blink-warn {
+    50% { opacity: 0.3; }
+}
+.wipe-timer {
+    font-family: var(--mono); font-size: 0.9rem; color: var(--muted);
+}
+.confirmed-actions {
+    display: flex; gap: 1rem; margin-top: 1.5rem;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
