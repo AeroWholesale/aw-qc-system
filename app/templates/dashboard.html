@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AeroWholesale QC{% endblock %}
+
+{% block content %}
+<h1>QC Dashboard</h1>
+
+<div class="stats-bar">
+    <div class="stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">Total Today</div>
+    </div>
+    <div class="stat-card stat-pending">
+        <div class="stat-number" id="stat-pending">0</div>
+        <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card stat-testing">
+        <div class="stat-number" id="stat-testing">0</div>
+        <div class="stat-label">Testing</div>
+    </div>
+    <div class="stat-card stat-passed">
+        <div class="stat-number" id="stat-passed">0</div>
+        <div class="stat-label">Passed</div>
+    </div>
+    <div class="stat-card stat-failed">
+        <div class="stat-number" id="stat-failed">0</div>
+        <div class="stat-label">Failed</div>
+    </div>
+</div>
+
+<table class="device-table">
+    <thead>
+        <tr>
+            <th>Serial</th>
+            <th>Type</th>
+            <th>Model</th>
+            <th>Status</th>
+            <th>Station</th>
+            <th>Technician</th>
+            <th>Tests</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody id="device-list"></tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

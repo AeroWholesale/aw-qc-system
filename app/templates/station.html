@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Station — AeroWholesale QC{% endblock %}
+
+{% block content %}
+<!-- State 1: Ready -->
+<div id="state-ready" class="station-state">
+    <h1>QC Station</h1>
+    <div class="station-setup">
+        <div class="form-group">
+            <label for="station-id">Station ID</label>
+            <input type="text" id="station-id" placeholder="e.g. Station-1">
+        </div>
+        <div class="form-group">
+            <label for="tech-name">Technician</label>
+            <input type="text" id="tech-name" placeholder="Your name">
+        </div>
+    </div>
+    <div class="scan-area">
+        <h2>Scan or Enter Device</h2>
+        <input type="text" id="serial-input" class="serial-input" placeholder="Serial number" autofocus>
+        <div class="form-row">
+            <select id="device-type">
+                <option value="macbook">MacBook</option>
+                <option value="iphone">iPhone</option>
+                <option value="ipad">iPad</option>
+            </select>
+            <input type="text" id="device-model" placeholder="Model (e.g. MacBook Pro 14 M3)">
+        </div>
+        <button id="btn-register" class="btn btn-primary btn-large">Start Testing</button>
+        <div id="detect-warning" class="warning hidden"></div>
+    </div>
+</div>
+
+<!-- State 2: Testing -->
+<div id="state-testing" class="station-state hidden">
+    <div class="device-info-bar">
+        <span id="test-serial" class="device-serial"></span>
+        <span id="test-model" class="device-model"></span>
+        <span id="test-type" class="badge"></span>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="test-progress"></div>
+        <span class="progress-text" id="progress-text">0 / 0</span>
+    </div>
+    <div id="test-checklist"></div>
+    <div class="station-actions">
+        <button id="btn-submit" class="btn btn-primary btn-large" disabled>Submit Results</button>
+        <button id="btn-cancel" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
+
+<!-- State 3: Complete -->
+<div id="state-complete" class="station-state hidden">
+    <div class="complete-summary">
+        <div id="overall-result" class="overall-result"></div>
+        <div id="result-summary" class="result-summary"></div>
+        <button id="btn-next" class="btn btn-primary btn-large">Next Device</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/station.js') }}"></script>
+{% endblock %}

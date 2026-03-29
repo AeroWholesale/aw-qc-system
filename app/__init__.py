@@ -31,4 +31,7 @@ def create_app(config_name=None):
     app.register_blueprint(devices_bp, url_prefix="/api/devices")
     app.register_blueprint(tests_bp, url_prefix="/api/tests")
 
+    import importlib
+    importlib.import_module("app.events")
+
     return app

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Device Detail — AeroWholesale QC{% endblock %}
+
+{% block content %}
+<div id="device-header">
+    <a href="/" class="back-link">&larr; Dashboard</a>
+    <h1 id="detail-serial">Loading...</h1>
+    <div class="device-meta">
+        <span id="detail-model"></span>
+        <span id="detail-type" class="badge"></span>
+        <span id="detail-status" class="badge"></span>
+    </div>
+    <div class="device-meta-secondary">
+        <span id="detail-station"></span>
+        <span id="detail-tech"></span>
+        <span id="detail-time"></span>
+    </div>
+</div>
+
+<div id="results-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const DEVICE_ID = {{ device_id }};
+</script>
+<script src="{{ url_for('static', filename='js/device_detail.js') }}"></script>
+{% endblock %}
