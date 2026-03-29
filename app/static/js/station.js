@@ -8,7 +8,7 @@ let autoData = {};
 let manualChecks = {};
 let computedGrade = null;
 let diagStepsCompleted = 0;
-const DIAG_STEPS = ["hardware","battery","storage","smart","display","memory","wifi","bluetooth","camera","audio","security","speeds"];
+const DIAG_STEPS = ["hardware","battery","system","smart","display","memory","wifi","bluetooth","camera","audio","security","speeds"];
 
 // ── Persist station settings ──
 const stationId = localStorage.getItem("qc_station_id") || "Station-1";
