@@ -1,4 +1,5 @@
 import os
+import importlib
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -26,12 +27,13 @@ def create_app(config_name=None):
     from app.routes.main import main_bp
     from app.routes.devices import devices_bp
     from app.routes.tests import tests_bp
+    from app.routes.station import station_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(devices_bp, url_prefix="/api/devices")
     app.register_blueprint(tests_bp, url_prefix="/api/tests")
+    app.register_blueprint(station_bp, url_prefix="/api/station")
 
-    import importlib
     importlib.import_module("app.events")
 
     return app

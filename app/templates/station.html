@@ -1,62 +1,207 @@
 {% extends "base.html" %}
 {% block title %}Station — AeroWholesale QC{% endblock %}
 
-{% block content %}
-<!-- State 1: Ready -->
-<div id="state-ready" class="station-state">
-    <h1>QC Station</h1>
-    <div class="station-setup">
-        <div class="form-group">
-            <label for="station-id">Station ID</label>
-            <input type="text" id="station-id" placeholder="e.g. Station-1">
-        </div>
-        <div class="form-group">
-            <label for="tech-name">Technician</label>
-            <input type="text" id="tech-name" placeholder="Your name">
+{% block body %}
+<div class="station-app">
+
+<!-- ══════ STATE 1: IDLE ══════ -->
+<div id="state-idle" class="panel">
+    <div class="idle-header">
+        <span class="station-badge" id="idle-station">STATION 1</span>
+        <span class="aw-brand">AEROWHOLESALE</span>
+    </div>
+    <div class="idle-center">
+        <div class="pulse-dot"></div>
+        <div class="idle-ready">READY</div>
+        <div class="idle-instruction">Plug in MacBook via USB-C</div>
+        <div class="idle-manual">
+            <input type="text" id="manual-serial" class="mono-input" placeholder="Or type serial number">
+            <button id="btn-manual-start" class="btn btn-accent">Start Manual</button>
         </div>
     </div>
-    <div class="scan-area">
-        <h2>Scan or Enter Device</h2>
-        <input type="text" id="serial-input" class="serial-input" placeholder="Serial number" autofocus>
-        <div class="form-row">
-            <select id="device-type">
-                <option value="macbook">MacBook</option>
-                <option value="iphone">iPhone</option>
-                <option value="ipad">iPad</option>
+    <div class="idle-footer">
+        <span class="today-count">Today: <span id="idle-count" class="mono-value">0</span></span>
+    </div>
+</div>
+
+<!-- ══════ STATE 2: LOADING ══════ -->
+<div id="state-loading" class="panel hidden">
+    <div class="loading-device-bar">
+        <span class="mono-value" id="load-model">MacBook Pro 14"</span>
+        <span class="mono-serial" id="load-serial">XXXXXXXXXXX</span>
+    </div>
+    <div class="diag-grid" id="diag-grid">
+        <div class="diag-step" data-step="hardware"><div class="step-icon">⚙</div><div class="step-label">Hardware</div></div>
+        <div class="diag-step" data-step="battery"><div class="step-icon">🔋</div><div class="step-label">Battery</div></div>
+        <div class="diag-step" data-step="storage"><div class="step-icon">💾</div><div class="step-label">Storage</div></div>
+        <div class="diag-step" data-step="smart"><div class="step-icon">🛡</div><div class="step-label">SMART</div></div>
+        <div class="diag-step" data-step="display"><div class="step-icon">🖥</div><div class="step-label">Display</div></div>
+        <div class="diag-step" data-step="memory"><div class="step-icon">🧠</div><div class="step-label">Memory</div></div>
+        <div class="diag-step" data-step="wifi"><div class="step-icon">📶</div><div class="step-label">WiFi</div></div>
+        <div class="diag-step" data-step="bluetooth"><div class="step-icon">🔵</div><div class="step-label">Bluetooth</div></div>
+        <div class="diag-step" data-step="camera"><div class="step-icon">📷</div><div class="step-label">Camera</div></div>
+        <div class="diag-step" data-step="audio"><div class="step-icon">🔊</div><div class="step-label">Audio</div></div>
+        <div class="diag-step" data-step="security"><div class="step-icon">🔒</div><div class="step-label">Security</div></div>
+        <div class="diag-step" data-step="speeds"><div class="step-icon">⚡</div><div class="step-label">Speeds</div></div>
+    </div>
+    <div class="loading-progress">
+        <div class="progress-track"><div class="progress-fill" id="load-progress"></div></div>
+        <div class="progress-status" id="load-status">Running diagnostics... 45s remaining</div>
+    </div>
+</div>
+
+<!-- ══════ STATE 3: GATE CHECK ══════ -->
+<div id="state-gate" class="panel hidden">
+    <div class="gate-banner">
+        <div class="gate-stop">⛔ STOP</div>
+        <div class="gate-reason" id="gate-reason">iCloud Activation Lock is ON</div>
+        <div class="gate-instruction">Set this unit aside — do not test</div>
+        <div class="gate-actions">
+            <button id="btn-gate-reject" class="btn btn-fail-large">Set Aside</button>
+            <button id="btn-gate-override" class="btn btn-muted">Override — Test Anyway</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ STATE 4: TESTING ══════ -->
+<div id="state-testing" class="panel hidden">
+    <div class="test-layout">
+        <!-- LEFT: Auto Results -->
+        <div class="test-left">
+            <div class="section-head">AUTO DIAGNOSTICS</div>
+            <div class="auto-results" id="auto-results">
+                <div class="ar" data-key="model"><span class="ar-label">Model</span><span class="ar-value" id="ar-model">—</span><span class="ar-badge" id="ab-model"></span></div>
+                <div class="ar" data-key="serial"><span class="ar-label">Serial</span><span class="ar-value mono" id="ar-serial">—</span><span class="ar-badge" id="ab-serial"></span></div>
+                <div class="ar" data-key="ram"><span class="ar-label">RAM</span><span class="ar-value" id="ar-ram">—</span><span class="ar-badge" id="ab-ram"></span></div>
+                <div class="ar" data-key="storage"><span class="ar-label">Storage</span><span class="ar-value" id="ar-storage">—</span><span class="ar-badge" id="ab-storage"></span></div>
+                <div class="ar" data-key="macos"><span class="ar-label">macOS</span><span class="ar-value" id="ar-macos">—</span><span class="ar-badge" id="ab-macos"></span></div>
+                <div class="ar divider"></div>
+                <div class="ar" data-key="battery"><span class="ar-label">Battery Health</span><span class="ar-value" id="ar-battery">—</span><span class="ar-badge" id="ab-battery"></span></div>
+                <div class="ar" data-key="cycles"><span class="ar-label">Cycle Count</span><span class="ar-value" id="ar-cycles">—</span><span class="ar-badge" id="ab-cycles"></span></div>
+                <div class="ar" data-key="smart"><span class="ar-label">SMART Status</span><span class="ar-value" id="ar-smart">—</span><span class="ar-badge" id="ab-smart"></span></div>
+                <div class="ar" data-key="disk_read"><span class="ar-label">Disk Read</span><span class="ar-value" id="ar-disk-read">—</span><span class="ar-badge" id="ab-disk-read"></span></div>
+                <div class="ar" data-key="disk_write"><span class="ar-label">Disk Write</span><span class="ar-value" id="ar-disk-write">—</span><span class="ar-badge" id="ab-disk-write"></span></div>
+                <div class="ar divider"></div>
+                <div class="ar" data-key="wifi"><span class="ar-label">WiFi</span><span class="ar-value" id="ar-wifi">—</span><span class="ar-badge" id="ab-wifi"></span></div>
+                <div class="ar" data-key="bluetooth"><span class="ar-label">Bluetooth</span><span class="ar-value" id="ar-bluetooth">—</span><span class="ar-badge" id="ab-bluetooth"></span></div>
+                <div class="ar" data-key="camera"><span class="ar-label">Camera</span><span class="ar-value" id="ar-camera">—</span><span class="ar-badge" id="ab-camera"></span></div>
+                <div class="ar" data-key="mem_pressure"><span class="ar-label">Memory Pressure</span><span class="ar-value" id="ar-mem-pressure">—</span><span class="ar-badge" id="ab-mem-pressure"></span></div>
+                <div class="ar divider"></div>
+                <div class="ar" data-key="icloud"><span class="ar-label">iCloud Lock</span><span class="ar-value" id="ar-icloud">—</span><span class="ar-badge" id="ab-icloud"></span></div>
+                <div class="ar" data-key="mdm"><span class="ar-label">MDM</span><span class="ar-value" id="ar-mdm">—</span><span class="ar-badge" id="ab-mdm"></span></div>
+                <div class="ar" data-key="filevault"><span class="ar-label">FileVault</span><span class="ar-value" id="ar-filevault">—</span><span class="ar-badge" id="ab-filevault"></span></div>
+                <div class="ar" data-key="sip"><span class="ar-label">SIP</span><span class="ar-value" id="ar-sip">—</span><span class="ar-badge" id="ab-sip"></span></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Manual Checks -->
+        <div class="test-right">
+            <div class="section-head">MANUAL INSPECTION</div>
+            <div class="manual-checks" id="manual-checks">
+
+                <div class="check-group-head">DISPLAY</div>
+                <div class="check-row" data-check="dead_pixels"><span class="check-label">Dead Pixels</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="backlight"><span class="check-label">Backlight (no bleed/spots)</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="screen_brightness"><span class="check-label">Screen Brightness</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="screen_damage"><span class="check-label">Physical Screen Damage</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+
+                <div class="check-group-head">KEYBOARD</div>
+                <div class="check-row" data-check="all_keys"><span class="check-label">All Keys Register</span><div class="check-btns"><button class="cbtn accent" onclick="openKeyTest()">Key Test</button><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="sticky_keys"><span class="check-label">No Sticky/Dead Keys</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="keyboard_backlight"><span class="check-label">Keyboard Backlight</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+
+                <div class="check-group-head">TRACKPAD</div>
+                <div class="check-row" data-check="trackpad_click"><span class="check-label">Physical Click</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="force_click"><span class="check-label">Force Click</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="scroll_gestures"><span class="check-label">Scroll &amp; Gestures</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+
+                <div class="check-group-head">PORTS</div>
+                <div class="check-row" data-check="tb_left"><span class="check-label">Thunderbolt Left</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="tb_right"><span class="check-label">Thunderbolt Right</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="magsafe"><span class="check-label">MagSafe</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row port-optional" data-check="hdmi"><span class="check-label">HDMI</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row port-optional" data-check="sd_card"><span class="check-label">SD Card</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row port-optional" data-check="headphone_jack"><span class="check-label">Headphone Jack</span><div class="check-btns"><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+
+                <div class="check-group-head">AUDIO</div>
+                <div class="check-row" data-check="left_speaker"><span class="check-label">Left Speaker</span><div class="check-btns"><button class="cbtn accent" onclick="playTone('left')">▶ Test</button><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="right_speaker"><span class="check-label">Right Speaker</span><div class="check-btns"><button class="cbtn accent" onclick="playTone('right')">▶ Test</button><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+                <div class="check-row" data-check="microphone"><span class="check-label">Microphone</span><div class="check-btns"><button class="cbtn accent" onclick="testMic()">🎙 Rec</button><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+
+                <div class="check-group-head">CAMERA</div>
+                <div class="check-row" data-check="facetime_camera"><span class="check-label">FaceTime Camera</span><div class="check-btns"><button class="cbtn accent" onclick="openCameraPreview()">👁 Preview</button><button class="cbtn pass" onclick="markCheck(this,'pass')">PASS</button><button class="cbtn fail" onclick="markCheck(this,'fail')">FAIL</button></div></div>
+
+                <div class="check-group-head">COSMETIC</div>
+                <div class="check-row cosmetic-row" data-check="screen_condition"><span class="check-label">Screen Condition</span><select class="cosmetic-select" onchange="markCosmetic(this)"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="Cracked">Cracked</option></select></div>
+                <div class="check-row cosmetic-row" data-check="body_condition"><span class="check-label">Body Condition</span><select class="cosmetic-select" onchange="markCosmetic(this)"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="Damaged">Damaged</option></select></div>
+                <div class="check-row cosmetic-row" data-check="overall_cosmetic_grade"><span class="check-label">Overall Cosmetic</span><select class="cosmetic-select" onchange="markCosmetic(this)"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+            </div>
+
+            <button id="btn-grade" class="btn btn-accent btn-block">CALCULATE GRADE →</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ STATE 5: GRADE & CONFIRM ══════ -->
+<div id="state-grade" class="panel hidden">
+    <div class="grade-layout">
+        <div class="grade-left">
+            <div class="grade-badge" id="grade-badge">CAP1</div>
+            <div class="grade-desc" id="grade-desc">Premium — Like New</div>
+            <div class="grade-battery" id="grade-battery">Battery: 92% · 87 cycles</div>
+            <div class="grade-fails" id="grade-fails"></div>
+        </div>
+        <div class="grade-right">
+            <label class="field-label">Grade Override</label>
+            <select id="grade-override" class="dark-select">
+                <option value="">— No Override —</option>
+                <option>CAP1</option><option>CAP</option><option>CA+</option><option>CA</option>
+                <option>CAB</option><option>SD</option><option>SD-</option><option>SDB</option>
+                <option>XF</option><option>XC</option>
             </select>
-            <input type="text" id="device-model" placeholder="Model (e.g. MacBook Pro 14 M3)">
+            <label class="field-label">Technician</label>
+            <input type="text" id="tech-name" class="dark-input" placeholder="Your name">
+            <label class="field-label">Notes</label>
+            <textarea id="confirm-notes" class="dark-textarea" rows="3" placeholder="Optional notes"></textarea>
+            <button id="btn-confirm" class="btn btn-purple btn-block">CONFIRM &amp; PRINT LABEL</button>
         </div>
-        <button id="btn-register" class="btn btn-primary btn-large">Start Testing</button>
-        <div id="detect-warning" class="warning hidden"></div>
     </div>
 </div>
 
-<!-- State 2: Testing -->
-<div id="state-testing" class="station-state hidden">
-    <div class="device-info-bar">
-        <span id="test-serial" class="device-serial"></span>
-        <span id="test-model" class="device-model"></span>
-        <span id="test-type" class="badge"></span>
-    </div>
-    <div class="progress-bar-container">
-        <div class="progress-bar" id="test-progress"></div>
-        <span class="progress-text" id="progress-text">0 / 0</span>
-    </div>
-    <div id="test-checklist"></div>
-    <div class="station-actions">
-        <button id="btn-submit" class="btn btn-primary btn-large" disabled>Submit Results</button>
-        <button id="btn-cancel" class="btn btn-secondary">Cancel</button>
+<!-- ══════ STATE 6: CONFIRMED ══════ -->
+<div id="state-confirmed" class="panel hidden">
+    <div class="confirmed-center">
+        <div class="confirmed-grade" id="confirmed-grade">CAP1</div>
+        <div class="confirmed-label-sent">Label sent to printer</div>
+        <div class="confirmed-count">Today: <span id="confirmed-count" class="mono-value">0</span></div>
+        <div class="confirmed-countdown">Next unit in <span id="countdown-num">5</span>s</div>
+        <button id="btn-next-now" class="btn btn-accent">Next Unit Now</button>
     </div>
 </div>
 
-<!-- State 3: Complete -->
-<div id="state-complete" class="station-state hidden">
-    <div class="complete-summary">
-        <div id="overall-result" class="overall-result"></div>
-        <div id="result-summary" class="result-summary"></div>
-        <button id="btn-next" class="btn btn-primary btn-large">Next Device</button>
+</div><!-- /station-app -->
+
+<!-- ══════ KEY TEST MODAL ══════ -->
+<div id="key-test-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">KEYBOARD TEST <span class="modal-timer" id="key-timer">30s</span><button class="modal-close" onclick="closeKeyTest()">✕</button></div>
+        <div class="keyboard-map" id="keyboard-map"></div>
+        <div class="modal-foot">
+            <span id="key-count">0/78 keys pressed</span>
+            <button class="btn btn-accent" onclick="closeKeyTest()">Done</button>
+        </div>
     </div>
 </div>
+
+<!-- ══════ CAMERA PREVIEW MODAL ══════ -->
+<div id="camera-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">CAMERA PREVIEW <button class="modal-close" onclick="closeCameraPreview()">✕</button></div>
+        <video id="camera-video" autoplay playsinline></video>
+        <div class="modal-foot"><button class="btn btn-accent" onclick="closeCameraPreview()">Close</button></div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify
 
@@ -18,12 +18,16 @@ def list_devices():
 def stats():
     today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     devices_today = Device.query.filter(Device.created_at >= today).all()
+    total = len(devices_today)
+    passed = sum(1 for d in devices_today if d.status == "passed")
+    failed = sum(1 for d in devices_today if d.status == "failed")
     return jsonify({
-        "total": len(devices_today),
+        "total": total,
         "pending": sum(1 for d in devices_today if d.status == "pending"),
         "testing": sum(1 for d in devices_today if d.status == "testing"),
-        "passed": sum(1 for d in devices_today if d.status == "passed"),
-        "failed": sum(1 for d in devices_today if d.status == "failed"),
+        "passed": passed,
+        "failed": failed,
+        "pass_rate": round(passed / (passed + failed) * 100) if (passed + failed) > 0 else 0,
     })
 
 
@@ -51,7 +55,9 @@ def get_device(device_id):
 def update_device(device_id):
     device = db.get_or_404(Device, device_id)
     data = request.get_json()
-    for field in ("status", "station_id", "tested_by", "notes"):
+    for field in ("status", "station_id", "tested_by", "notes", "grade",
+                   "grade_description", "battery_health", "cycle_count",
+                   "ram", "storage", "model", "model_id"):
         if field in data:
             setattr(device, field, data[field])
     db.session.commit()
@@ -72,7 +78,7 @@ def detect_device():
         })
     device = Device(
         serial_number=serial,
-        device_type=data["device_type"],
+        device_type=data.get("device_type", "macbook"),
         model=data.get("model", "Unknown"),
         station_id=data.get("station_id"),
         tested_by=data.get("tested_by"),
