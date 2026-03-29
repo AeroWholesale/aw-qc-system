@@ -12,9 +12,11 @@ station_bp = Blueprint("station_api", __name__)
 
 @station_bp.route("/update", methods=["POST"])
 def station_update():
-    """Broadcast station status to supervisor dashboard."""
+    """Broadcast station status to dashboard and the specific station display."""
     data = request.get_json()
+    station_id = data.get("station_id", "")
     socketio.emit("station_status", data, room="dashboard")
+    socketio.emit("station_status", data, room=f"station_{station_id}")
     return jsonify({"ok": True})
 
 

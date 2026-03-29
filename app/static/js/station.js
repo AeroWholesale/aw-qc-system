@@ -2,6 +2,7 @@
    AeroWholesale QC — Station Controller
    ═══════════════════════════════════════════ */
 const socket = io();
+socket.emit("join_station", { station_id: localStorage.getItem("qc_station_id") || "Station-1" });
 
 let currentDevice = null;
 let autoData = {};
@@ -78,7 +79,8 @@ async function startManual() {
     showPanel("testing");
 }
 
-// ── Auto detection via SocketIO (from station_watcher.py) ──
+// ── Auto detection via SocketIO ──
+// Listen for device_registered (direct from server on POST /api/devices/detect)
 socket.on("device_registered", device => {
     if (device.station_id === stationId && !currentDevice) {
         currentDevice = device;
@@ -86,14 +88,38 @@ socket.on("device_registered", device => {
     }
 });
 
+// Listen for station_status (from station_watcher.py via POST /api/station/update)
+socket.on("station_status", data => {
+    if (data.station_id !== stationId) return;
+    if (data.state === "loading" && data.device && !currentDevice) {
+        currentDevice = data.device;
+        startDiagLoading();
+    } else if (data.state === "idle" && currentDevice) {
+        // Device was unplugged before testing started
+        const panel = document.querySelector(".panel:not(.hidden)");
+        if (panel && panel.id === "state-loading") {
+            resetAll();
+        }
+    }
+});
+
 // ── Diagnostics loading state ──
+let simTimer = null;
+
 function startDiagLoading() {
     document.getElementById("load-model").textContent = currentDevice.model;
     document.getElementById("load-serial").textContent = currentDevice.serial_number;
     diagStepsCompleted = 0;
+    document.querySelectorAll(".diag-step").forEach(s => s.classList.remove("done","running"));
+    document.getElementById("load-progress").style.width = "0%";
     showPanel("loading");
-    // Simulate diagnostics if agent.py isn't running (demo mode)
-    simulateDiag();
+    // Wait 8 seconds for real agent.py data before falling back to simulation
+    simTimer = setTimeout(() => {
+        if (diagStepsCompleted === 0) {
+            console.log("No agent data received — running simulation");
+            simulateDiag();
+        }
+    }, 8000);
 }
 
 function simulateDiag() {
@@ -111,6 +137,8 @@ function simulateDiag() {
 
 socket.on("diagnostic_step", data => {
     if (currentDevice && data.device_id === currentDevice.id) {
+        // Real agent data arrived — cancel simulation fallback
+        if (simTimer) { clearTimeout(simTimer); simTimer = null; }
         if (data.data) Object.assign(autoData, data.data);
         completeDiagStep(data.step);
         if (diagStepsCompleted >= DIAG_STEPS.length) diagComplete();
