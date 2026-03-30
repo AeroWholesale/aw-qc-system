@@ -12,4 +12,7 @@ with app.app_context():
     seed_defaults()
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    import os
+    debug = os.environ.get("FLASK_ENV", "development") != "production"
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port, debug=debug)

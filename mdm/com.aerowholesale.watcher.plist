@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.aerowholesale.watcher</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/aeroserver/aw-qc-system/station_watcher.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>UserName</key>
+    <string>aeroserver</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/aeroserver/aw-qc-system</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>QC_STATION_ID</key>
+        <string>Station-1</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Apple Configurator.app/Contents/MacOS</string>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/tmp/aw-qc-watcher.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/aw-qc-watcher.err</string>
+</dict>
+</plist>

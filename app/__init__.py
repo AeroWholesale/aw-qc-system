@@ -22,7 +22,13 @@ def create_app(config_name=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
-    socketio.init_app(app, cors_allowed_origins="*", async_mode="gevent")
+    # Use gevent in production (gunicorn), fall back to threading in dev
+    try:
+        import gevent  # noqa: F401
+        async_mode = "gevent"
+    except ImportError:
+        async_mode = "threading"
+    socketio.init_app(app, cors_allowed_origins="*", async_mode=async_mode)
 
     from app.routes.main import main_bp
     from app.routes.devices import devices_bp

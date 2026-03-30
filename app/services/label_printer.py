@@ -82,16 +82,30 @@ def print_label(zpl):
             except (PermissionError, OSError) as e:
                 continue
 
-    # Fall back to CUPS
+    # Fall back to CUPS — try known Zebra printer names
+    zebra_names = ["Zebra_GX420d", "Zebra_GX420D", "ZebraGX420d", "Zebra"]
+    # Also discover CUPS printers with "zebra" in the name
     try:
-        result = subprocess.run(
-            ["lp", "-d", "Zebra_GX420d", "-o", "raw"],
-            input=zpl.encode("utf-8"),
-            capture_output=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            return {"success": True, "method": "cups"}
+        lpstat = subprocess.run(["lpstat", "-p"], capture_output=True, text=True, timeout=5)
+        if lpstat.returncode == 0:
+            for line in lpstat.stdout.splitlines():
+                if "zebra" in line.lower():
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        zebra_names.insert(0, parts[1])
+    except Exception:
+        pass
+
+    try:
+        for printer_name in zebra_names:
+            result = subprocess.run(
+                ["lp", "-d", printer_name, "-o", "raw"],
+                input=zpl.encode("utf-8"),
+                capture_output=True,
+                timeout=10,
+            )
+            if result.returncode == 0:
+                return {"success": True, "method": "cups", "printer": printer_name}
 
         # Try without specifying printer name (use default)
         result = subprocess.run(
@@ -108,3 +122,25 @@ def print_label(zpl):
         return {"success": False, "error": "No printer found. Check USB connection."}
     except subprocess.TimeoutExpired:
         return {"success": False, "error": "Printer timeout"}
+
+
+def test_print():
+    """Print a test label to verify the Zebra printer is connected and working."""
+    from datetime import datetime
+    test_data = {
+        "model": "*** PRINTER TEST ***",
+        "serial": "TEST-LABEL-001",
+        "ram": "",
+        "storage": "",
+        "color": "",
+        "battery_health": "",
+        "cycle_count": "",
+        "grade": "TEST",
+        "passed": True,
+        "fail_reason": "",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "station": "Test",
+        "tech": "Setup",
+    }
+    zpl = generate_zpl(test_data)
+    return print_label(zpl)
